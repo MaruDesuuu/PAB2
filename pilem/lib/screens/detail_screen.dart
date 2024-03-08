@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:pilem/models/movie.dart';
@@ -21,6 +20,13 @@ class _DetailScreenState extends State<DetailScreen> {
     setState(() {
       isFavorite = prefs.containsKey('movie_${widget.movie.id}');
     });
+  }
+
+  Future<void> _toggleFavorite() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isFavorite = !isFavorite;
+    });
 
     if (isFavorite) {
       final String movieJson = jsonEncode(widget.movie.toJson());
@@ -32,15 +38,14 @@ class _DetailScreenState extends State<DetailScreen> {
       prefs.setStringList('favoriteMovies', favoriteMovieIds);
     } else {
       prefs.remove('movie_${widget.movie.id}');
-      List<String> favoriteMoviesIds =
+      List<String> favoriteMovieIds =
           prefs.getStringList('favoriteMovies') ?? [];
-      favoriteMoviesIds.remove(widget.movie.id.toString());
-      prefs.setStringList('favoriteMovies', favoriteMoviesIds);
+      favoriteMovieIds.remove(widget.movie.id.toString());
+      prefs.setStringList('favoriteMovies', favoriteMovieIds);
     }
   }
 
-  Future<void> _toggleFavorite() async {}
-
+  @override
   void initState() {
     super.initState();
     _checkIsFavorite();
@@ -53,60 +58,75 @@ class _DetailScreenState extends State<DetailScreen> {
         title: Text(widget.movie.title),
       ),
       body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            child: Column(children: [
-              Stack(
-                children: [
-                  Image.network(
-                    'https://image.tmdb.org/t/p/w500${widget.movie.backdropPath}',
-                    height: 300,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(children: [
+                Image.network(
+                  'https://image.tmdb.org/t/p/w500${widget.movie.backdropPath}',
+                  height: 300,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
                     child: IconButton(
                       onPressed: _toggleFavorite,
                       icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                      ),
+                          isFavorite ? Icons.favorite : Icons.favorite_border),
                       color: Colors.red,
                     ),
                   ),
-                ],
+                )
+              ]),
+              const SizedBox(height: 20),
+              const Text(
+                'Overview:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(widget.movie.overview),
               const SizedBox(height: 20),
               Row(
                 children: [
-                  const Icon(Icons.calendar_month, color: Colors.blue),
+                  const Icon(
+                    Icons.calendar_month,
+                    color: Colors.blue,
+                  ),
                   const SizedBox(width: 10),
-                  const Text('Release Date',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Text(widget.movie.releaseDate)
+                  const Text(
+                    'Release Date:',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(widget.movie.releaseDate),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
-                  const Icon(Icons.star, color: Colors.amber),
+                  const Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
                   const SizedBox(width: 10),
-                  const Text('Rating',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Text(widget.movie.releaseDate)
+                  const Text(
+                    'Rating:',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(widget.movie.voteAverage.toString()),
                 ],
               ),
-              const SizedBox(height: 20),
-              Text(widget.movie.voteAverage.toString())
-            ]),
-          )),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
